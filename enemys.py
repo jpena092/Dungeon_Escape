@@ -1,6 +1,5 @@
 import pygame
 from movement import move_character
-from pathfinding import find_next_step, reset_paths
 
 #enemy variables
 basic_enemy = pygame.Rect(975, 675, 60, 60)  #(X,Y,W,H)
@@ -14,7 +13,6 @@ slow_enemy_speed = 1
 
 
 def reset_enemys(floor):
-    reset_paths()
    
     basic_enemy.topleft = (975, 675)
     slow_enemy.topleft = (600, 750)
@@ -41,28 +39,46 @@ def reset_enemys(floor):
 
 
 def move_enemy(enemy, enemy_speed, player, walls):
-    #find the next turn, even if we need to move away from the player first
-    next_step = find_next_step(enemy, player, walls)
-    if next_step is None:
-        return
-
-    next_x, next_y = next_step
+    #player control tracking of player to enemy
+   
     dx = 0
     dy = 0
 
-    #checking horizontal axis for the next part of the route
-    if enemy.x < next_x:
-        dx = min(enemy_speed, next_x - enemy.x)
-    if enemy.x > next_x:
-        dx = -min(enemy_speed, enemy.x - next_x)
+    #enemy checking for player on horizontal axis
+    if enemy.x < player.x:
+        #returns positive if we need to shift right
+        dx = min(enemy_speed, player.x - enemy.x)
+    if enemy.x > player.x:
+        #returns negative if we need to shift left
+        dx = -min(enemy_speed, enemy.x - player.x)
 
-    #checking vertical axis, still only one axis per frame
-    if enemy.y < next_y:
-        dy = min(enemy_speed, next_y - enemy.y)
-    if enemy.y > next_y:
-        dy = -min(enemy_speed, enemy.y - next_y)
+    #checking vertical axis
+    if enemy.y < player.y:
+        dy = min(enemy_speed, player.y - enemy.y)
+        #positive shift down
+    if enemy.y > player.y:
+        dy = -min(enemy_speed, enemy.y - player.y)
+        #negative shift up
 
-    move_character(enemy, walls, dx, dy)
+    x_distance = abs(player.x - enemy.x)
+    y_distance = abs(player.y - enemy.y)
+    old_x = enemy.x
+    old_y = enemy.y
+
+    #try the axis with the bigger distance first
+    if x_distance > y_distance:
+        move_character(enemy, walls, dx, 0)
+
+        #if x is blocked try y instead
+        if enemy.x == old_x:
+            move_character(enemy, walls, 0, dy)
+
+    else:
+        move_character(enemy, walls, 0, dy)
+
+        #if y is blocked try x instead
+        if enemy.y == old_y:
+            move_character(enemy, walls, dx, 0)
 
 
 def movement_enemy(player, walls):

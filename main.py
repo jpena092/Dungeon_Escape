@@ -6,7 +6,7 @@ from movement import move_player
 from health import check_damage, draw_hearts
 from settings import WIDTH, HEIGHT, PLAYER_SIZE, PLAYER_START, PLAYER_SPEED, FPS, TOTAL_FLOORS
 from settings import MAX_HEALTH, DAMAGE_COOLDOWN
-
+from menu import main_menu
 
 def main():
     #making the game window dimensions
@@ -16,6 +16,13 @@ def main():
     clock = pygame.time.Clock()
     font = pygame.font.Font(None, 30)
     big_font = pygame.font.Font(None, 64)
+
+    # Show main menu
+    menu_choice = main_menu(screen, clock)
+
+    if menu_choice == "quit":
+        pygame.quit()
+        return
 
     #PLAYER VARIABLES
     player = pygame.Rect(PLAYER_START, (PLAYER_SIZE, PLAYER_SIZE))
